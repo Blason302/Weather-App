@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skies — Weather</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+
+<!-- ══════════════════════════
+     SIDEBAR
+══════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-name">🌤 Skies</span>
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="btn-c" onclick="switchUnit('C')">°C</button>
+      <button class="unit-btn" id="btn-f" onclick="switchUnit('F')">°F</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="s-search-wrap">
+    <div class="s-search-bar">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="opacity:.6;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="s-search-input" id="search-input" type="text" placeholder="Search city…" autocomplete="off">
+      <button class="locate-btn" onclick="locateMe()" title="Use my location">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="9" stroke-dasharray="4 2"/></svg>
+      </button>
+    </div>
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+
+  <!-- Current weather summary (sidebar) -->
+  <div class="sidebar-weather glass" id="sidebar-weather">
+    <div class="sw-location">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <span id="sw-city">—</span>
+    </div>
+    <div class="sw-temp-row">
+      <div>
+        <div class="sw-temp" id="sw-temp">—</div>
+        <div class="sw-condition" id="sw-condition">—</div>
+        <div class="sw-feels" id="sw-feels">—</div>
+      </div>
+      <div id="sw-icon" style="font-size:44px;line-height:1">—</div>
+    </div>
+    <button class="sw-add-btn" id="fav-toggle-btn" onclick="toggleFavorite()">
+      <span id="fav-btn-icon">＋</span>
+      <span id="fav-btn-text">Save to Favorites</span>
+    </button>
+  </div>
+
+  <!-- Favorites -->
+  <div class="fav-section">
+    <div class="fav-header">
+      <span class="fav-title">Favorites</span>
+      <span class="fav-count" id="fav-count">0</span>
+    </div>
+    <div class="fav-list" id="fav-list">
+      <div class="fav-empty" id="fav-empty">
+        ⭐<br>No favorites yet.<br>Search a city and tap<br><strong>Save to Favorites</strong>.
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════
+     MAIN PANEL
+══════════════════════════ -->
+<main class="main-panel">
+
+  <!-- HOME PAGE -->
+  <div class="page active" id="page-home">
+    <div class="state-msg show" id="state-idle">
+      <div class="emoji">🌤</div>
+      <p>Search for a city or use your location<br>to see the weather</p>
+    </div>
+    <div class="state-msg" id="state-loading"><div class="spinner"></div><p>Fetching weather…</p></div>
+    <div class="state-msg" id="state-error"><div class="emoji">⚠️</div><p id="error-msg">Something went wrong.</p></div>
+
+    <div class="weather-content" id="weather-content">
+      <div class="section-label" style="margin-top:0">Current Conditions</div>
+      <div class="glass" style="padding:.1rem;margin-bottom:1rem;">
+        <div class="stats-grid" style="padding:1rem;gap:10px;">
+          <div class="stat-item"><div class="stat-label">Humidity</div><div class="stat-value" id="humidity">—</div><div class="hum-bar-wrap"><div class="hum-bar" id="hum-bar" style="width:0%"></div></div></div>
+          <div class="stat-item"><div class="stat-label">Wind</div><div class="stat-value" id="wind-speed">—</div><div class="stat-sub" id="wind-dir">—</div></div>
+          <div class="stat-item"><div class="stat-label">Precipitation</div><div class="stat-value" id="precip">—</div><div class="stat-sub" id="precip-prob">—</div></div>
+          <div class="stat-item"><div class="stat-label">Visibility</div><div class="stat-value" id="visibility">—</div><div class="stat-sub" id="uv-index">—</div></div>
+        </div>
+        <div class="divider" style="margin:.25rem 1rem;"></div>
+        <div class="sun-card glass" style="margin:.75rem;border:none;background:rgba(255,255,255,0.08);">
+          <div class="sun-item"><div style="font-size:20px">🌅</div><div class="sun-label">Sunrise</div><div class="sun-time" id="sunrise">—</div></div>
+          <div class="sun-div"></div>
+          <div class="sun-item"><div style="font-size:20px">🌇</div><div class="sun-label">Sunset</div><div class="sun-time" id="sunset">—</div></div>
+          <div class="sun-div"></div>
+          <div class="sun-item"><div style="font-size:20px">☀️</div><div class="sun-label">Day length</div><div class="sun-time" id="day-length">—</div></div>
+        </div>
+      </div>
+
+      <div class="section-label">Explore in Detail</div>
+      <div class="feature-grid glass" style="padding:.75rem;margin-bottom:1rem;gap:8px;">
+        <div class="feat-card glass" onclick="goPage('page-hourly')"><div class="feat-arrow">›</div><div class="feat-icon">🕐</div><div class="feat-title">Hourly Forecast</div><div class="feat-desc">24-hr timeline</div></div>
+        <div class="feat-card glass" onclick="goPage('page-airquality')"><div class="feat-arrow">›</div><div class="feat-icon">🌿</div><div class="feat-title">Air Quality</div><div class="feat-desc">AQI & pollutants</div></div>
+        <div class="feat-card glass" onclick="goPage('page-weekly')"><div class="feat-arrow">›</div><div class="feat-icon">📅</div><div class="feat-title">Weekly Details</div><div class="feat-desc">7-day breakdown</div></div>
+        <div class="feat-card glass" onclick="goPage('page-insights')"><div class="feat-arrow">›</div><div class="feat-icon">🛰️</div><div class="feat-title">Insights</div><div class="feat-desc">Stats & facts</div></div>
+      </div>
+
+      <div class="section-label">7-Day Forecast</div>
+      <div class="glass forecast-wrap" id="forecast-list"></div>
+      <div class="updated" id="updated-line">—</div>
+    </div>
+  </div>
+
+  <!-- HOURLY PAGE -->
+  <div class="page" id="page-hourly">
+    <div class="page-top">
+      <button class="back-btn" onclick="goBack()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+      <span class="page-title">Hourly Forecast</span>
+    </div>
+    <div class="section-label" style="margin-top:0">Temperature curve — next 24 hours</div>
+    <div class="glass h-chart-wrap" style="margin-bottom:1rem;padding-bottom:.75rem;">
+      <svg id="temp-svg" height="90" style="width:100%;overflow:visible;" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="hourly-cols">
+      <div>
+        <div class="section-label" style="margin-top:0">Hourly cards</div>
+        <div class="glass" style="overflow:hidden;margin-bottom:1rem;">
+          <div class="h-scroll"><div class="h-track" id="hourly-track"></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-top:0">Hour-by-hour detail</div>
+        <div class="glass"><div class="h-detail-list" id="hourly-detail"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AIR QUALITY PAGE -->
+  <div class="page" id="page-airquality">
+    <div class="page-top">
+      <button class="back-btn" onclick="goBack()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+      <span class="page-title">Air Quality</span>
+    </div>
+    <div class="aqi-layout">
+      <div class="aqi-left">
+        <div class="glass" style="overflow:hidden;margin-bottom:1rem;">
+          <div class="aqi-hero">
+            <div class="aqi-ring-wrap">
+              <svg class="aqi-ring-svg" viewBox="0 0 148 148" fill="none">
+                <circle cx="74" cy="74" r="62" stroke="rgba(255,255,255,0.12)" stroke-width="11"/>
+                <circle cx="74" cy="74" r="62" id="aqi-ring" stroke="rgba(80,220,100,0.85)" stroke-width="11" stroke-linecap="round" stroke-dasharray="390" stroke-dashoffset="390" style="transition:stroke-dashoffset 1.2s ease,stroke .5s ease"/>
+              </svg>
+              <div class="aqi-center">
+                <div class="aqi-num" id="aqi-number">—</div>
+                <div class="aqi-sm">AQI</div>
+              </div>
+            </div>
+            <div class="aqi-cat" id="aqi-category">—</div>
+            <div class="aqi-advice" id="aqi-advice">—</div>
+          </div>
+          <div class="divider" style="margin:0"></div>
+          <div style="padding:.9rem 1.25rem 1.1rem">
+            <div class="section-label" style="margin-top:.3rem">Pollutants</div>
+            <div class="poll-grid" id="pollutant-grid"></div>
+          </div>
+        </div>
+      </div>
+      <div class="aqi-right">
+        <div class="glass" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">
+          <div class="section-label" style="margin-top:0">💡 Health Recommendations</div>
+          <div id="health-tips"></div>
+        </div>
+        <div class="section-label">AQI Scale Guide</div>
+        <div class="glass" style="padding:1.1rem 1.25rem;">
+          <div class="aqi-scale-row"><div class="aqi-swatch" style="background:rgba(80,220,100,.85)"></div><span><strong>0–50</strong> — Good</span></div>
+          <div class="aqi-scale-row"><div class="aqi-swatch" style="background:rgba(255,220,50,.85)"></div><span><strong>51–100</strong> — Moderate</span></div>
+          <div class="aqi-scale-row"><div class="aqi-swatch" style="background:rgba(255,140,50,.85)"></div><span><strong>101–150</strong> — Unhealthy for sensitive groups</span></div>
+          <div class="aqi-scale-row"><div class="aqi-swatch" style="background:rgba(220,60,60,.85)"></div><span><strong>151–200</strong> — Unhealthy</span></div>
+          <div class="aqi-scale-row"><div class="aqi-swatch" style="background:rgba(160,50,160,.85)"></div><span><strong>201–300</strong> — Very Unhealthy</span></div>
+          <div class="aqi-scale-row" style="margin-bottom:0"><div class="aqi-swatch" style="background:rgba(140,30,30,.85)"></div><span><strong>300+</strong> — Hazardous</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEKLY PAGE -->
+  <div class="page" id="page-weekly">
+    <div class="page-top">
+      <button class="back-btn" onclick="goBack()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+      <span class="page-title">Weekly Details</span>
+    </div>
+    <p style="font-size:13px;color:var(--text-sec);margin-bottom:1.1rem;">Tap any day to expand full details.</p>
+    <div class="weekly-list" id="weekly-list"></div>
+  </div>
+
+  <!-- INSIGHTS PAGE -->
+  <div class="page" id="page-insights">
+    <div class="page-top">
+      <button class="back-btn" onclick="goBack()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+      <span class="page-title">Weather Insights</span>
+    </div>
+    <div class="section-label" style="margin-top:0">Today at a Glance</div>
+    <div class="glass" style="padding:1rem;margin-bottom:1rem;">
+      <div class="ins-grid" id="insights-today"></div>
+    </div>
+    <div class="section-label">This Week</div>
+    <div class="glass" style="padding:1.1rem 1.25rem;margin-bottom:1rem;" id="weekly-stats"></div>
+    <div class="section-label">Did You Know?</div>
+    <div class="glass" style="padding:1.1rem 1.25rem;" id="fun-facts"></div>
+  </div>
+
+</main>
+</div>
+<script src="Weather.js"></script>
+</body>
+</html>
